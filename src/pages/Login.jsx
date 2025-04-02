@@ -52,8 +52,6 @@ function Login() {
         />
         <button type="submit">Log in</button>
       </form>
-      <span>Don't have an account?</span>
-      <Link to="/register">Register.</Link>
     </div>
   );
 }

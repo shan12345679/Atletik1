@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import supabase from "../helper/supabaseClient";
 import { Link, useNavigate } from "react-router-dom";
+import "./admin.css"; // Import the separate CSS file
 
 function Login() {
   const navigate = useNavigate();
@@ -31,29 +32,34 @@ function Login() {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      <br></br>
-      {message && <span>{message}</span>}
-      <form onSubmit={handleSubmit}>
-        <input
-          onChange={(e) => setEmail(e.target.value)}
-          value={email}
-          type="email"
-          placeholder="Email"
-          required
-        />
-        <input
-          onChange={(e) => setPassword(e.target.value)}
-          value={password}
-          type="password"
-          placeholder="Password"
-          required
-        />
-        <button type="submit">Log in</button>
+    <div className="login-page-container">
+      <form className="login" onSubmit={handleSubmit}>
+        <h2 className="login-title">Login</h2>
+        <br />
+        {message && <span>{message}</span>}
+        <div className="input-container">
+          <input
+            onChange={(e) => setEmail(e.target.value)}
+            value={email}
+            type="email"
+            placeholder="Email"
+            required
+          />
+        </div>
+        <div className="input-container">
+          <input
+            onChange={(e) => setPassword(e.target.value)}
+            value={password}
+            type="password"
+            placeholder="Password"
+            required
+          />
+        </div>
+        <button type="submit" className="submit">Log in</button>
       </form>
     </div>
   );
+  
 }
 
 export default Login;

@@ -32,7 +32,7 @@ function Dashboard() {
       </div>
 
       <div className="dashboard-content">
-        <h1>Welcome to the Admin Dashboard</h1>
+        <h1>Welcome to the Admin</h1>
         <p>This is your control panel.</p>
       </div>
     </div>

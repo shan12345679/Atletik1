@@ -116,6 +116,8 @@ function Dashboard() {
                     <th>Created Date</th>
                     <th>Filer ID</th>
                     <th>Location</th>
+                    <th>Status</th>
+                    <th>Accept/Decline</th>
                   </tr>
                 </thead>
                 <tbody>

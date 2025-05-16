@@ -35,7 +35,12 @@ function Dashboard() {
     if (error) {
       console.error("Club Applications fetch error:", error.message);
     } else {
-      setClubAppData(data);
+      // Initialize status as 'pending' if not set
+      const dataWithStatus = data.map(item => ({
+        ...item,
+        status: item.status || 'pending'
+      }));
+      setClubAppData(dataWithStatus);
     }
   };
 
@@ -49,6 +54,40 @@ function Dashboard() {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
     navigate("/login");
+  };
+
+  const updateApplicationStatus = async (applicationId, newStatus) => {
+    console.log(`Application ID: ${applicationId}, Status: ${newStatus}`)
+    try {
+      const { data, error } = await supabase
+        .from('club_applications')
+        .update({ status: newStatus })
+        .eq('application_id', applicationId);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setClubAppData(clubAppData.map(item => 
+        item.application_id === applicationId 
+          ? { ...item, status: newStatus } 
+          : item
+      ));
+      
+    } catch (error) {
+      console.error('Error updating status:', error.message);
+    }
+  };
+
+  // Helper function to get status color
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'accepted':
+        return 'status-accepted';
+      case 'rejected':
+        return 'status-declined';
+      default:
+        return 'status-pending';
+    }
   };
 
   return (
@@ -117,7 +156,7 @@ function Dashboard() {
                     <th>Filer ID</th>
                     <th>Location</th>
                     <th>Status</th>
-                    <th>Accept/Decline</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -131,6 +170,35 @@ function Dashboard() {
                       <td>{item.created_at?.slice(0, 10)}</td>
                       <td>{item.filer_id}</td>
                       <td>{item.location}</td>
+                      <td>
+                        <span className={`status-badge ${getStatusColor(item.status)}`}>
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="action-buttons">
+                        {
+                          item.status == "pending" && (
+                            <>
+                          <button 
+                          className="accept-btn"
+                          onClick={() => updateApplicationStatus(item.application_id, 'accepted')}
+                        >
+                          Accept
+                        </button>
+                       
+
+                        <button 
+                          className="decline-btn"
+                          onClick={() => updateApplicationStatus(item.application_id, 'rejected')}
+                        >
+                          Decline
+                        </button>
+                         </>
+                          )
+                          }
+                        
+                        
+                      </td>
                     </tr>
                   ))}
                 </tbody>

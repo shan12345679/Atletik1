@@ -90,6 +90,43 @@ function Dashboard() {
     }
   };
 
+  // Function to get image URL (handles both direct URLs and Supabase storage paths)
+const getImageUrl = (path) => {
+  if (!path) {
+    console.warn("getImageUrl: Path is null or empty.");
+    return null;
+  }
+  if (path.startsWith('http')) {
+    return path; // Already a full URL
+  }
+
+  // --- IMPORTANT: Replace 'your-bucket-name' with your actual Supabase bucket name ---
+  const BUCKET_NAME = 'club-documents';
+
+  try {
+    const { data, error } = supabase
+      .storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(path);
+
+    if (error) {
+      console.error(`Error getting public URL for path '${path}' from bucket '${BUCKET_NAME}':`, error.message);
+      // You might want to return a placeholder image URL or null in case of error
+      return null;
+    }
+
+    if (data && data.publicUrl) {
+      return data.publicUrl;
+    } else {
+      console.warn(`getImageUrl: No public URL returned for path '${path}' from bucket '${BUCKET_NAME}'.`);
+      return null;
+    }
+  } catch (e) {
+    console.error(`Unexpected error in getImageUrl for path '${path}':`, e);
+    return null;
+  }
+};
+
   return (
     <div className="dashboard-wrapper">
       <div className="dashboard-sidebar">
@@ -165,8 +202,26 @@ function Dashboard() {
                       <td>{item.application_id}</td>
                       <td>{item.name}</td>
                       <td>{item.establishment}</td>
-                      <td>{item.bir_registration}</td>
-                      <td>{item.business_permit}</td>
+                      <td>
+                        {item.bir_registration && (
+                          <img 
+                            src={getImageUrl(item.bir_registration)} 
+                            alt="BIR Registration" 
+                            className="document-image"
+                            onClick={() => window.open(getImageUrl(item.bir_registration), '_blank')}
+                          />
+                        )}
+                      </td>
+                      <td>
+                        {item.business_permit && (
+                          <img 
+                            src={getImageUrl(item.business_permit)} 
+                            alt="Business Permit" 
+                            className="document-image"
+                            onClick={() => window.open(getImageUrl(item.business_permit), '_blank')}
+                          />
+                        )}
+                      </td>
                       <td>{item.created_at?.slice(0, 10)}</td>
                       <td>{item.filer_id}</td>
                       <td>{item.location}</td>
@@ -176,28 +231,22 @@ function Dashboard() {
                         </span>
                       </td>
                       <td className="action-buttons">
-                        {
-                          item.status == "pending" && (
-                            <>
-                          <button 
-                          className="accept-btn"
-                          onClick={() => updateApplicationStatus(item.application_id, 'accepted')}
-                        >
-                          Accept
-                        </button>
-                       
-
-                        <button 
-                          className="decline-btn"
-                          onClick={() => updateApplicationStatus(item.application_id, 'rejected')}
-                        >
-                          Decline
-                        </button>
-                         </>
-                          )
-                          }
-                        
-                        
+                        {item.status === "pending" && (
+                          <>
+                            <button 
+                              className="accept-btn"
+                              onClick={() => updateApplicationStatus(item.application_id, 'accepted')}
+                            >
+                              Accept
+                            </button>
+                            <button 
+                              className="decline-btn"
+                              onClick={() => updateApplicationStatus(item.application_id, 'rejected')}
+                            >
+                              Decline
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}
